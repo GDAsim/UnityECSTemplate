@@ -23,7 +23,6 @@ namespace TemplateSpawner
                 var baseEntity = GetEntity(TransformUsageFlags.Dynamic);
 
                 // Add additional Components
-                // Add additional Components
                 var spawnPos = authoring.transform.position;
                 if (authoring.SpawnTransform != null)
                 {

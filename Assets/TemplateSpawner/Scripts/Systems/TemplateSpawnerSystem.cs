@@ -1,6 +1,7 @@
 namespace TemplateSpawner
 {
     using Unity.Burst;
+    using Unity.Collections;
     using Unity.Entities;
     using Unity.Transforms;
 
@@ -15,18 +16,46 @@ namespace TemplateSpawner
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
+            // Create ECB Method 1 - Create From System - https://docs.unity3d.com/Packages/com.unity.entities@1.3/manual/systems-entity-command-buffer-automatic-playback.html
             var ecbSingleton = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
-            EntityCommandBuffer ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
-            //vs
-            //EntityCommandBuffer ecb2 = new EntityCommandBuffer(Allocator.TempJob);
-            //EntityCommandBuffer.ParallelWriter parallelEcb = ecb2.AsParallelWriter();
+            var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
 
-            DoJobs(ref state, ref ecb);
+            // Create ECB Method 2 - Create Manual Adhoc - https://docs.unity3d.com/Packages/com.unity.entities@1.3/manual/systems-entity-command-buffer-use.html
+            // Manually do ecs.Playback() and ecb.Dispose()
+            //var ecb = new EntityCommandBuffer(Allocator.TempJob);
+
+            DoSystemAPIForeach(ref state, ref ecb);
+            //DoJobs(ref state, ref ecb);
+
+            // For ECB Method 2
+            //state.Dependency.Complete();
+            //ecb.Playback(state.EntityManager);
+            //ecb.Dispose();
         }
 
-        void Do(ref SystemState state)
+        void DoSystemAPIForeach(ref SystemState state, ref EntityCommandBuffer ecb)
         {
+            var ElapsedTime = SystemAPI.Time.ElapsedTime;
 
+            foreach (var spawnerDataRW in SystemAPI.Query<RefRW<SpawnerData>>())
+            {
+                var data = spawnerDataRW.ValueRO;
+
+                if (data.NextSpawnTime < ElapsedTime)
+                {
+                    // Spawns a new entity and positions it at the spawner.
+                    Entity newBulletEntity = ecb.Instantiate(data.EntitySpawnPrefab);
+
+                    // Set Position
+                    var pos = data.SpawnPosition;
+                    ecb.SetComponent(newBulletEntity, LocalTransform.FromPosition(pos));
+
+                    // Resets the next spawn time.
+                    data.NextSpawnTime = (float)ElapsedTime + data.SpawnRate;
+                }
+
+                spawnerDataRW.ValueRW = data;
+            }
         }
 
         void DoJobs(ref SystemState state, ref EntityCommandBuffer ecb)
@@ -49,18 +78,18 @@ namespace TemplateSpawner
         // This example queries for all Spawner components and uses `ref` to specify that the operation
         // requires read and write access. Unity processes `Execute` for each entity that matches the
         // component data query.
-        void Execute([ChunkIndexInQuery] int chunkIndex, ref SpawnerData spawner)
+        void Execute([ChunkIndexInQuery] int chunkIndex, ref SpawnerData data)
         {
-            if (spawner.NextSpawnTime < ElapsedTime)
+            if (data.NextSpawnTime < ElapsedTime)
             {
                 // Spawns a new entity and positions it at the spawner.
-                Entity newBulletEntity = Ecb.Instantiate(chunkIndex, spawner.EntitySpawnPrefab);
+                Entity newBulletEntity = Ecb.Instantiate(chunkIndex, data.EntitySpawnPrefab);
 
-                var pos = spawner.SpawnPosition;
+                var pos = data.SpawnPosition;
                 Ecb.SetComponent(chunkIndex, newBulletEntity, LocalTransform.FromPosition(pos));
 
                 // Resets the next spawn time.
-                spawner.NextSpawnTime = (float)ElapsedTime + spawner.SpawnRate;
+                data.NextSpawnTime = (float)ElapsedTime + data.SpawnRate;
             }
         }
     }

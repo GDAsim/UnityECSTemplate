@@ -13,7 +13,7 @@ namespace TemplateSpawner
             public override void Bake(TemplateSpawnerAuthoring authoring)
             {
                 // 1. Create the initial systems in the world
-                var templateSystemHandle = World.DefaultGameObjectInjectionWorld.CreateSystem<TemplateSpawnerSystem>();
+                var templateSpawnerSystemHandle = World.DefaultGameObjectInjectionWorld.CreateSystem<TemplateSpawnerSystem>();
 
                 // 2. Find Existing SystemGroup to insert the system into
                 var InitSG = World.DefaultGameObjectInjectionWorld.GetExistingSystemManaged<InitializationSystemGroup>();
@@ -25,7 +25,7 @@ namespace TemplateSpawner
                 // ========================  InitializationSystemGroup   ==============================
 
                 // ===========================  SimulationSystemGroup       ===========================
-                SimSG.AddSystemToUpdateList(templateSystemHandle);
+                SimSG.AddSystemToUpdateList(templateSpawnerSystemHandle);
 
                 // ===========================  PresentationSystemGroup  ===========================
             }
