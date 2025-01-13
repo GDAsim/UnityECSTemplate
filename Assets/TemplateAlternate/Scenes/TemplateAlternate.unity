@@ -479,7 +479,7 @@ GameObject:
   - component: {fileID: 507190979}
   - component: {fileID: 507190980}
   m_Layer: 0
-  m_Name: TemplateAlternateAuthoring
+  m_Name: TemplateAlternateSetup
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -526,7 +526,7 @@ GameObject:
   - component: {fileID: 1263868538}
   - component: {fileID: 1263868542}
   m_Layer: 0
-  m_Name: TemplateObjectAuthoring
+  m_Name: TemplateObjectSetup
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -633,7 +633,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4c78f7deda9561a45916adc372fa000f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Speed: 0
+  Speed: {x: 1, y: 0.5, z: 0}
 --- !u!1 &1558265193
 GameObject:
   m_ObjectHideFlags: 0
@@ -873,5 +873,5 @@ SceneRoots:
   - {fileID: 1558265196}
   - {fileID: 465740867}
   - {fileID: 507190979}
-  - {fileID: 227476757}
   - {fileID: 1263868541}
+  - {fileID: 227476757}

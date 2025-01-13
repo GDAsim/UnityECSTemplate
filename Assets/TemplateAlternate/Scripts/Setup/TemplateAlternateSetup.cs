@@ -4,14 +4,15 @@ namespace TemplateAlternate
     using UnityEngine;
 
     /// <summary>
-    /// Alternative way to setup
+    /// Alternative Way To Setup ECS, though monobehaviour instead of Authoring (not recommanded workflow)
     /// </summary>
-    public class TemplateAlternateAuthoring : MonoBehaviour
+    public class TemplateAlternateSetup : MonoBehaviour
     {
         void Start()
         {
             // 1. Create the initial systems in the world
-            var templateSystemHandle = World.DefaultGameObjectInjectionWorld.CreateSystem<TemplateSystem>();
+            var templateUnmanagedSystemHandle = World.DefaultGameObjectInjectionWorld.CreateSystem<TemplateUnmanagedSystem>();
+            var templateManagedSystemHandle = World.DefaultGameObjectInjectionWorld.CreateSystemManaged<TemplateManagedSystem>();
 
             // 2. Find Existing SystemGroup to insert the system into
             var InitSG = World.DefaultGameObjectInjectionWorld.GetExistingSystemManaged<InitializationSystemGroup>();
@@ -21,13 +22,14 @@ namespace TemplateAlternate
             // 3. Add System to Appropriate Group
 
             // ========================  InitializationSystemGroup   ==============================
-            InitSG.AddSystemToUpdateList(templateSystemHandle);
+            //InitSG.AddSystemToUpdateList(templateSystemHandle);
 
             // ===========================  SimulationSystemGroup       ===========================
-            SimSG.AddSystemToUpdateList(templateSystemHandle);
+            SimSG.AddSystemToUpdateList(templateUnmanagedSystemHandle);
+            SimSG.AddSystemToUpdateList(templateManagedSystemHandle);
 
             // ===========================  PresentationSystemGroup  ===========================
-            PresentSG.AddSystemToUpdateList(templateSystemHandle);
+            //PresentSG.AddSystemToUpdateList(templateUnmanagedSystemHandle);
         }
     }
 }

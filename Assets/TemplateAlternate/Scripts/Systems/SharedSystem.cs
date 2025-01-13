@@ -1,4 +1,4 @@
-namespace Template
+namespace TemplateAlternate
 {
     using Unity.Burst;
     using Unity.Entities;
