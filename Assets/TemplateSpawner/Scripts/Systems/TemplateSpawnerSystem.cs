@@ -16,8 +16,10 @@ namespace TemplateSpawner
         public void OnUpdate(ref SystemState state)
         {
             var ecbSingleton = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
-
             EntityCommandBuffer ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
+            //vs
+            //EntityCommandBuffer ecb2 = new EntityCommandBuffer(Allocator.TempJob);
+            //EntityCommandBuffer.ParallelWriter parallelEcb = ecb2.AsParallelWriter();
 
             DoJobs(ref state, ref ecb);
         }

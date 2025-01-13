@@ -1,4 +1,4 @@
-namespace Template
+namespace TemplateAlternate
 {
     using Unity.Burst;
     using Unity.Entities;
@@ -28,7 +28,6 @@ namespace Template
 
         void DoJobs(ref SystemState state, ref EntityCommandBuffer ecb)
         {
-            
             new TemplateJob
             {
                 ElapsedTime = SystemAPI.Time.ElapsedTime,
@@ -49,7 +48,7 @@ namespace Template
         // component data query.
         void Execute([ChunkIndexInQuery] int chunkIndex, ref TemplateData spawner)
         {
-            
+            //Ecb.SetComponent(chunkIndex, newBulletEntity, LocalTransform.FromPosition(pos));
         }
     }
 }
