@@ -27,8 +27,8 @@ namespace Template
                 //InitSG.AddSystemToUpdateList(templateUnmanagedSystemHandle);
 
                 // ===========================  SimulationSystemGroup       ===========================
-                SimSG.AddSystemToUpdateList(templateUnmanagedSystemHandle);
                 SimSG.AddSystemToUpdateList(templateManagedSystemHandle);
+                SimSG.AddSystemToUpdateList(templateUnmanagedSystemHandle);
 
                 // ===========================  PresentationSystemGroup  ===========================
                 //PresentSG.AddSystemToUpdateList(templateUnmanagedSystemHandle);

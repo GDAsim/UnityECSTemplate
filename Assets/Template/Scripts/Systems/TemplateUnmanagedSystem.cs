@@ -1,7 +1,6 @@
 namespace Template
 {
     using Unity.Burst;
-    using Unity.Collections;
     using Unity.Entities;
     using Unity.Mathematics;
     using Unity.Transforms;
@@ -16,13 +15,16 @@ namespace Template
     [DisableAutoCreation]
     public partial struct TemplateUnmanagedSystem : ISystem
     {
+        ComponentLookup<LocalTransform> localTransformLU;
+        ComponentLookup<TemplateData> dataLU;
 
         /// <summary>
         /// Called when System is created
         /// </summary>
         [BurstCompile] public void OnCreate(ref SystemState state) 
         {
-            
+            localTransformLU = state.GetComponentLookup<LocalTransform>(false);
+            dataLU = state.GetComponentLookup<TemplateData>(true);
         }
 
         /// <summary>
@@ -40,9 +42,10 @@ namespace Template
             // Manually do ecs.Playback() and ecb.Dispose()
             //var ecb = new EntityCommandBuffer(Allocator.TempJob);
 
-            // Choose!!
-            DoSystemAPIForeach(ref state, ref ecb);
-            //DoECSJobs(ref state, ref ecb);
+            // Choose!! Uncomment one 
+            //DoSystemAPIForeach(ref state, ref ecb);
+            //DoECSJobs(ref state);
+            DoECSJobsDataLookup(ref state,ref localTransformLU, ref dataLU);
 
             // For ECB Method 2
             //Dependency.Complete();
@@ -82,12 +85,35 @@ namespace Template
         /// Note: IJobEntity is reusable
         /// Note: IJobEntity takes less time to compile than Entities.ForEach
         /// </summary>
-        void DoECSJobs(ref SystemState state, ref EntityCommandBuffer ecb)
+        void DoECSJobs(ref SystemState state)
         {
-            new TemplateJob
+            var job = new TemplateJob
             {
                 time = (float)SystemAPI.Time.ElapsedTime,
-            }.ScheduleParallel();
+            };
+            state.Dependency = job.ScheduleParallel(state.Dependency);
+        }
+
+        /// <summary>
+        /// https://docs.unity3d.com/Packages/com.unity.entities@1.0/manual/systems-looking-up-data.html
+        /// 
+        /// === ECS Jobs with Arbitrary Data Lookup ===
+        /// Note: This cannot be Schedule ScheduleParallel if there are write operations
+        /// </summary>
+        void DoECSJobsDataLookup(ref SystemState state,
+            ref ComponentLookup<LocalTransform> localTransformLU,
+            ref ComponentLookup<TemplateData> dataLU)
+        {
+            localTransformLU.Update(ref state);
+            dataLU.Update(ref state);
+
+            var job = new TemplateJobDataLookup
+            {
+                localTransformLU = localTransformLU,
+                dataLU = dataLU,
+                time = (float)SystemAPI.Time.ElapsedTime,
+            };
+            state.Dependency = job.Schedule(state.Dependency);
         }
     }
 }

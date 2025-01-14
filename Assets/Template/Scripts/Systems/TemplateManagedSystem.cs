@@ -1,6 +1,7 @@
 namespace Template
 {
     using Unity.Burst;
+    using Unity.Collections;
     using Unity.Entities;
     using Unity.Mathematics;
     using Unity.Transforms;
@@ -15,6 +16,9 @@ namespace Template
     public partial class TemplateManagedSystem : SystemBase
     {
         EntityQuery query;
+
+        public ComponentTypeHandle<LocalTransform> localTransformHandle;
+        [ReadOnly] public ComponentTypeHandle<TemplateData> templateDataHandle;
 
         /// <summary>
         /// Called when System is created
@@ -43,6 +47,9 @@ namespace Template
                 },
             };
             query = GetEntityQuery(qdesc);
+
+            localTransformHandle = GetComponentTypeHandle<LocalTransform>(false);
+            templateDataHandle = GetComponentTypeHandle<TemplateData>(true);
         }
 
         /// <summary>
@@ -76,13 +83,16 @@ namespace Template
             // Manually do ecs.Playback() and ecb.Dispose()
             //var ecb = new EntityCommandBuffer(Allocator.TempJob);
 
-            // Choose!!
-            DoEntitiesForeach();
+            // Choose!! Uncomment one 
+            //DoEntitiesForeach();
             //DoEntitiesForeachJob();
             //DoEntitiesForeachParallelJob();
-            //DoECSJobsWithQuery(ref ecb, ref query);
+            //DoECSJobs();
+            //DoECSJobsWithQuery(ref query);
+            //DoECSJobsDataLookup();
+            //DoECSChunkJob(ref query,ref localTransformHandle,ref templateDataHandle);
 
-            // For ECB Method 2
+            // Required For ECB Method 2
             //Dependency.Complete();
             //ecb.Playback(state.EntityManager);
             //ecb.Dispose();
@@ -177,12 +187,64 @@ namespace Template
         /// Note: IJobEntity is reusable
         /// Note: IJobEntity takes less time to compile than Entities.ForEach
         /// </summary>
-        void DoECSJobsWithQuery(ref EntityCommandBuffer ecb, ref EntityQuery query)
+        void DoECSJobs()
+        {
+            new TemplateJob
+            {
+                time = (float)SystemAPI.Time.ElapsedTime,
+            }.ScheduleParallel();
+        }
+        /// <summary>
+        /// https://docs.unity3d.com/Packages/com.unity.entities@1.3/manual/iterating-data-ijobentity.html
+        /// 
+        /// === ECS Jobs aka IJobEntity or Jobs for Entity===
+        /// Note: IJobEntity is reusable
+        /// Note: IJobEntity takes less time to compile than Entities.ForEach
+        /// </summary>
+        void DoECSJobsWithQuery(ref EntityQuery query)
         {
             new TemplateJob
             {
                 time = (float)SystemAPI.Time.ElapsedTime,
             }.ScheduleParallel(query);
+        }
+
+        /// <summary>
+        /// https://docs.unity3d.com/Packages/com.unity.entities@1.0/manual/systems-looking-up-data.html
+        /// 
+        /// === ECS Jobs with Arbitrary Data Lookup ===
+        /// Note: This cannot be Schedule ScheduleParallel if there are write operations
+        /// </summary>
+        void DoECSJobsDataLookup()
+        {
+            new TemplateJobDataLookup
+            {
+                localTransformLU = GetComponentLookup<LocalTransform>(false),
+                dataLU = GetComponentLookup<TemplateData>(true),
+                time = (float)SystemAPI.Time.ElapsedTime,
+            }.Schedule();
+        }
+
+        /// <summary>
+        /// https://docs.unity3d.com/Packages/com.unity.entities@1.0/manual/iterating-data-ijobchunk.html?q=IJobChunk
+        /// 
+        /// === ECS Chunk Jobs ===
+        /// Note: Have to do a lot of extra work, that other methods automatically does for us
+        /// </summary>
+        void DoECSChunkJob(ref EntityQuery query,
+            ref ComponentTypeHandle<LocalTransform> localTransformHandle,
+            ref ComponentTypeHandle<TemplateData> templateDataHandle)
+        {
+            localTransformHandle.Update(this);
+            templateDataHandle.Update(this);
+            var job = new TemplateChunkJob
+            {
+                LocalTransformHandle = localTransformHandle,
+                TemplateDataHandle = templateDataHandle,
+                time = (float)SystemAPI.Time.ElapsedTime,
+            };
+
+            Dependency = job.ScheduleParallel(query, Dependency);
         }
     }
 }
