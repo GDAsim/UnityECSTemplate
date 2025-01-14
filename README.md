@@ -2,7 +2,7 @@
 Code Template for ECS Projects Quick Setups
 
 ## Template
-- Basic ECS Workflow
+- Basic ECS Setup using Baking (Ibaker)
 - Unmanaged & Managed System
 - Code for ComponentData Access
   - SystemAPI Query Foreach
@@ -13,8 +13,16 @@ Code Template for ECS Projects Quick Setups
   - ECS Jobs With Arbitrary Data Lookup
   - ECS Chunk Jobs 
 
-
 ## TemplateAlternate
+- Alternate ECS Setup using Monobehaviour
+
 ## TemplateJobOnly
+- Basic Jobs Setup using Monobehaviour
+
 ## TemplateProcessJob
+- Jobs.WithCode to Process Data Only Setup
+- Basic DynamicBuffer Usage Example
+
 ## TemplateSpawner
+- ECS Setup for Spawning Objects
+- Basic EntityComponentBuffer Usage Example
