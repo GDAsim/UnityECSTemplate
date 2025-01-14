@@ -9,7 +9,6 @@ namespace Template
     /// Template Managed System
     /// Note: Use this for Operating on Unmanaged + Managed Components
     /// Note: Can use Entities.ForEach
-    /// Note: Can use Job.withCode
     /// </summary>
     [RequireMatchingQueriesForUpdate] // Run OnUpdate Only when there's valid Queries
     [DisableAutoCreation]
